@@ -27,7 +27,17 @@ CFLAGS += -I$(TI_XXWARE) -I$(CONTIKI)/$(TI_XXWARE_SRC)
 CFLAGS += -I$(TI_XXWARE)/inc
 MODULES += $(TI_XXWARE_SRC)
 
-LDSCRIPT = $(CONTIKI_CPU)/cc26xx.ld
+### If OTA is enabled, rework linker script.
+ifeq ($(OTA_ENABLED),1)
+	FIRMWARE_OFFSET=0x2000 # Boot loader is 8KB, Firmware should start after that (Flash page 2)
+	FIRMWARE_META_HEADER_SIZE=0x100 # Firmware meta header size is 256
+	OTA_DEFINES = -DFIRMWARE_OFFSET=$(FIRMWARE_OFFSET) -DFIRMWARE_META_HEADER_SIZE=$(FIRMWARE_META_HEADER_SIZE) -DOTA_ENABLED=1
+	CFLAGS += $(OTA_DEFINES)
+	GENERATE_LDSCRIPT = $(Q)$(LD) -P -E $(OTA_DEFINES) $(CONTIKI_CPU)/cc26xx-cc13xx.ota-firmware.c -o $(CONTIKI_CPU)/cc26xx-cc13xx.ota-firmware.ld
+	LDSCRIPT = $(CONTIKI_CPU)/cc26xx-cc13xx.ota-firmware.ld
+else
+	LDSCRIPT = $(CONTIKI_CPU)/cc26xx.ld
+endif
 
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections
@@ -47,14 +57,14 @@ endif
 
 ### Are we building with code size optimisations?
 ifeq ($(SMALL),1)
-  CFLAGS += -Os
+	CFLAGS += -Os
 else
-  CFLAGS += -O2
+	CFLAGS += -O2
 endif
 
 ### If the user-specified a Node ID, pass a define
 ifdef NODEID
-  CFLAGS += -DIEEE_ADDR_NODE_ID=$(NODEID)
+	CFLAGS += -DIEEE_ADDR_NODE_ID=$(NODEID)
 endif
 
 ### CPU-dependent cleanup files
@@ -109,6 +119,10 @@ $(OBJECTDIR)/ccfg.o: ccfg.c FORCE | $(OBJECTDIR)
 
 ### Compilation rules
 CUSTOM_RULE_LINK=1
+
+#	Generate LDSCRIPT useful only when OTA_ENABLED=1
+$(LDSCRIPT): FORCE
+	$(GENERATE_LDSCRIPT)
 
 %.elf: $(TARGET_STARTFILES) %.co $(PROJECT_OBJECTFILES) $(PROJECT_LIBRARIES) contiki-$(TARGET).a $(LDSCRIPT)
 	$(TRACE_LD)

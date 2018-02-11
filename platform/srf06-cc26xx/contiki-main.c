@@ -143,6 +143,11 @@ set_rf_params(void)
 int
 main(void)
 {
+#if OTA_ENABLED
+  // VTOR table address must be respecified when OTA is enabled (previous value 0x0000...)
+  HWREG(NVIC_VTABLE) = FIRMWARE_OFFSET + FIRMWARE_META_HEADER_SIZE;
+#endif /* OTA_ENABLED */
+
   /* Enable flash cache and prefetch. */
   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_ENABLED);
   ti_lib_vims_configure(VIMS_BASE, true, true);
