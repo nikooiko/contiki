@@ -27,6 +27,9 @@ CFLAGS += -I$(TI_XXWARE) -I$(CONTIKI)/$(TI_XXWARE_SRC)
 CFLAGS += -I$(TI_XXWARE)/inc
 MODULES += $(TI_XXWARE_SRC)
 
+### Add llsec modules
+MODULES += core/net/llsec/noncoresec
+
 ### If OTA is enabled, rework linker script.
 ifeq ($(OTA_ENABLED),1)
 	FIRMWARE_OFFSET=0x2000 # Boot loader is 8KB, Firmware should start after that (Flash page 2)
