@@ -312,6 +312,17 @@ update_parent(struct collect_conn *tc)
      by Gnawali et al (SenSys 2009). */
 
   if(best != NULL) {
+#if COLLECT_PARENT_CONF_HARDCODED
+    uint8_t i;
+    if (!linkaddr_cmp(best, &COLLECT_PARENT_CONF_ADDRESS)) {
+      DBG("Ignoring best parent [");
+      for (i = 0; i < LINKADDR_SIZE; i++) {
+        DBG("%02x", best->addr.u8[i]);
+      }
+      DBG("\n");
+      return;
+    }
+#endif
     linkaddr_t previous_parent;
 
     if(DRAW_TREE) {
