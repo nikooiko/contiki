@@ -978,13 +978,20 @@ input_packet(void)
       }
 
 #if EMULATE_LINK_QUALITY_LOSSES
-      uint8_t chance = random_rand() % 100;
-      DBG("contikimac: Emulated receive packet chance = %u\n", chance);
-      if (chance > EMULATED_LINK_QUALITY_SUCCESS_RATE) {
-        DBG("contikimac: Emulated receive packet loss... Dropping packet\n");
-        return;
+      uint8_t i;
+      if (linkaddr_cmp(packetbuf_addr(PACKETBUF_ADDR_SENDER), &EMULATE_LINK_QUALITY_ADDRESS)) {
+        uint8_t chance = random_rand() % 100;
+        DBG("contikimac: Emulated receive packet from [");
+        for (i = 0; i < LINKADDR_SIZE; i++) {
+          DBG("%02x", packetbuf_addr(PACKETBUF_ADDR_SENDER)->addr.u8[i]);
+        }
+        DBG("] with chance=%u\n", chance);
+        if (chance > EMULATED_LINK_QUALITY_SUCCESS_RATE) {
+          DBG("contikimac: Emulated receive packet loss... Dropping packet\n");
+          return;
+        }
+        DBG("contikimac: Emulated receive packet success!\n");
       }
-      DBG("contikimac: Emulated receive packet success!\n");
 #endif
 
 #if RDC_WITH_DUPLICATE_DETECTION
