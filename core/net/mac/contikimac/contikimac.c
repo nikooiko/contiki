@@ -977,6 +977,16 @@ input_packet(void)
         ctimer_stop(&ct);
       }
 
+#if EMULATE_LINK_QUALITY_LOSSES
+      uint8_t chance = random_rand() % 100;
+      DBG("contikimac: Emulated receive packet chance = %u\n", chance);
+      if (chance > EMULATED_LINK_QUALITY_SUCCESS_RATE) {
+        DBG("contikimac: Emulated receive packet loss... Dropping packet\n");
+        return;
+      }
+      DBG("contikimac: Emulated receive packet success!\n");
+#endif
+
 #if RDC_WITH_DUPLICATE_DETECTION
       /* Check for duplicate packet. */
       duplicate = mac_sequence_is_duplicate();
