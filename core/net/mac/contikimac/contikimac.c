@@ -979,18 +979,19 @@ input_packet(void)
 
 #if EMULATE_LINK_QUALITY_LOSSES
       uint8_t i;
-      if (linkaddr_cmp(packetbuf_addr(PACKETBUF_ADDR_SENDER), &EMULATE_LINK_QUALITY_ADDRESS)) {
+      uint8_t link_quality_address[] = EMULATE_LINK_QUALITY_ADDRESS;
+      if (linkaddr_cmp(packetbuf_addr(PACKETBUF_ADDR_SENDER), (linkaddr_t *)&link_quality_address)) {
         uint8_t chance = random_rand() % 100;
-        DBG("contikimac: Emulated receive packet from [");
+        printf("contikimac: Emulated receive packet from [");
         for (i = 0; i < LINKADDR_SIZE; i++) {
-          DBG("%02x", packetbuf_addr(PACKETBUF_ADDR_SENDER)->addr.u8[i]);
+          printf("%02x", packetbuf_addr(PACKETBUF_ADDR_SENDER)->u8[i]);
         }
-        DBG("] with chance=%u\n", chance);
+        printf("] with chance=%u\n", chance);
         if (chance > EMULATED_LINK_QUALITY_SUCCESS_RATE) {
-          DBG("contikimac: Emulated receive packet loss... Dropping packet\n");
+          printf("contikimac: Emulated receive packet loss... Dropping packet\n");
           return;
         }
-        DBG("contikimac: Emulated receive packet success!\n");
+        printf("contikimac: Emulated receive packet success!\n");
       }
 #endif
 
