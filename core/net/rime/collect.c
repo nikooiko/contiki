@@ -314,12 +314,13 @@ update_parent(struct collect_conn *tc)
   if(best != NULL) {
 #if COLLECT_PARENT_CONF_HARDCODED
     uint8_t i;
-    if (!linkaddr_cmp(best, &COLLECT_PARENT_CONF_ADDRESS)) {
-      DBG("Ignoring best parent [");
+    uint8_t collect_parent_addr[] = COLLECT_PARENT_CONF_ADDRESS;
+    if (!linkaddr_cmp(&best->addr, (linkaddr_t *)collect_parent_addr)) {
+      printf("Ignoring best parent [");
       for (i = 0; i < LINKADDR_SIZE; i++) {
-        DBG("%02x", best->addr.u8[i]);
+        printf("%02x", best->addr.u8[i]);
       }
-      DBG("\n");
+      printf("\n");
       return;
     }
 #endif
