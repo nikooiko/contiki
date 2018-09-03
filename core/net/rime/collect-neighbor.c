@@ -146,6 +146,19 @@ collect_neighbor_list_add(struct collect_neighbor_list *neighbors_list,
 {
   struct collect_neighbor *n;
 
+#if COLLECT_PARENT_CONF_HARDCODED
+  uint8_t i;
+  uint8_t collect_parent_addr[] = COLLECT_PARENT_CONF_ADDRESS;
+  if (!linkaddr_cmp(addr, (linkaddr_t *)collect_parent_addr)) {
+    printf("Ignoring best parent [");
+    for (i = 0; i < LINKADDR_SIZE; i++) {
+      printf("%02x", addr->u8[i]);
+    }
+    printf("\n");
+    return 0;
+  }
+#endif
+
   if(addr == NULL) {
     PRINTF("collect_neighbor_list_add: attempt to add NULL addr\n");
     return 0;
