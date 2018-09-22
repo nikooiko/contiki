@@ -104,6 +104,21 @@
 /* Are we currently receiving a burst? */
 static int we_are_receiving_burst = 0;
 
+#if EMULATE_LINK_QUALITY_LOSSES
+/* LQ STATE */
+static uint8_t lq = EMULATED_LINK_QUALITY_SUCCESS_RATE_START;
+static struct ctimer lqt;
+
+static void change_lq(void *ptr) {
+  if (lq > EMULATED_LINK_QUALITY_SUCCESS_RATE_END) {
+    printf("LQ drops to %u\n", lq);
+    lq--;
+    ctimer_reset(&lqt);
+  }
+}
+/* -------- */
+#endif
+
 /* INTER_PACKET_DEADLINE is the maximum time a receiver waits for the
    next packet of a burst when FRAME_PENDING is set. */
 #ifdef CONTIKIMAC_CONF_INTER_PACKET_DEADLINE
@@ -987,7 +1002,7 @@ input_packet(void)
           printf("%02x", packetbuf_addr(PACKETBUF_ADDR_SENDER)->u8[i]);
         }
         printf("] with chance=%u\n", chance);
-        if (chance > EMULATED_LINK_QUALITY_SUCCESS_RATE) {
+        if (chance > lq) {
           printf("contikimac: Emulated receive packet loss... Dropping packet\n");
           return;
         }
@@ -1067,6 +1082,10 @@ init(void)
 #if WITH_PHASE_OPTIMIZATION
   phase_init();
 #endif /* WITH_PHASE_OPTIMIZATION */
+
+#if EMULATE_LINK_QUALITY_LOSSES
+  ctimer_set(&lqt, EMULATED_LINK_QUALITY_CHANGE_PERIOD * CLOCK_SECOND, change_lq, NULL);
+#endif
 
 }
 /*---------------------------------------------------------------------------*/

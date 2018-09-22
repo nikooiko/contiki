@@ -150,7 +150,7 @@ collect_neighbor_list_add(struct collect_neighbor_list *neighbors_list,
   uint8_t i;
   uint8_t collect_parent_addr[] = COLLECT_PARENT_CONF_ADDRESS;
   if (!linkaddr_cmp(addr, (linkaddr_t *)collect_parent_addr)) {
-    printf("Ignoring best parent [");
+    printf("Ignoring parent [");
     for (i = 0; i < LINKADDR_SIZE; i++) {
       printf("%02x", addr->u8[i]);
     }
